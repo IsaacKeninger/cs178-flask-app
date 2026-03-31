@@ -5,7 +5,8 @@
 from flask import Flask
 from flask import render_template
 from flask import Flask, render_template, request, redirect, url_for, flash
-# from dbCode import *
+import pymysql
+from dbCode import *
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key' # this is an artifact for using flash displays; 
@@ -14,6 +15,13 @@ app.secret_key = 'your_secret_key' # this is an artifact for using flash display
 @app.route('/')
 def home():
     return render_template('home.html')
+
+@app.route('/display_companies')
+def display_companies():
+    rows = execute_query("""SELECT * FROM companies;""")
+    return render_template(display_companies.html)
+    
+                
 
 @app.route('/add-user', methods=['GET', 'POST'])
 def add_user():

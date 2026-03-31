@@ -4,6 +4,9 @@
 --          interview_rounds, compensation, deadlines
 -- ============================================================
 
+CREATE DATABASE IF NOT EXISTS job_tracker;
+USE job_tracker;
+
 -- ------------------------------------------------------------
 -- 1. USERS
 --    One user owns all their applications / data.

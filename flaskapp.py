@@ -19,7 +19,7 @@ def home():
 @app.route('/display_companies')
 def display_companies():
     rows = execute_query("""SELECT * FROM companies;""")
-    return render_template(display_companies.html)
+    return render_template(display_companies.html, companies=rows)
     
                 
 

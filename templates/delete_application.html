@@ -1,14 +1,21 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <title>Delete User</title>
-  </head>
-  <body>
-    <h1>Delete User</h1>
-    <form action="{{ url_for('delete_user') }}" method="post">
-      <label for="name">Name:</label><br />
-      <input type="text" id="name" name="name" required /><br />
-      <input type="submit" value="Submit" />
-    </form>
-  </body>
+
+<head>
+  <title>Delete Application</title>
+</head>
+
+<body>
+  <h1>Delete Application</h1>
+  <form action="{{ url_for('delete_application') }}" method="post">
+    <label for="company_name">Company: </label><br />
+    <input type="text" id="company_name" name="company_name" required /><br />
+
+    <label for="job_title">Job Title: </label><br />
+    <input type="text" id="job_title" name="job_title" required /><br />
+
+    <input type="submit" value="Submit" />
+  </form>
+</body>
+
 </html>

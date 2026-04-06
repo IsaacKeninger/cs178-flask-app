@@ -68,11 +68,11 @@ def add_application():
         )
 
         res = execute_query(
-            "SELECT id FROM companies WHERE name = %s",
+            "SELECT company_id FROM companies WHERE name = %s",
             (company_name,)
         )
 
-        company_id = res[0]['id']
+        company_id = res[0]['company_id']
 
         execute_write(
             "INSERT INTO applications (company_name, job_title, job_url, applied_date, source, notes) VALUES (%s, %s, %s, %s, %s, %s)",

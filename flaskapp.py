@@ -16,7 +16,25 @@ from flask import Flask
 from flask import render_template
 from flask import Flask, render_template, request, redirect, url_for, flash
 import pymysql
+import datetime
+from datetime import timezone
+import boto3 # for dynamodb
 from dbCode import *
+
+# CLAUDE
+# for dynamodb log
+dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+event_table = dynamodb.table('event_log')
+
+#function for logging to the dynamodb table
+def log_event(app_id, event, old_val=None, new_val=None):
+    event_table.put_item(Item={
+        'application_id': str(app_id),
+        'timestamp': datetime.now(timezone.utc).isoformat(),
+        'event': event,
+        'old_val': old_val or '',
+        'new_val': new_val or ''
+    })
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key' # this is an artifact for using flash displays; 
@@ -31,24 +49,25 @@ def display_companies():
     rows = execute_query("""SELECT * FROM companies;""")
     return render_template('display_companies.html', companies=rows)
     
-@app.route('/add-user', methods=['GET', 'POST'])
-def add_user():
+@app.route('/add-application', methods=['GET', 'POST'])
+def add_application():
     if request.method == 'POST':
         # Extract form data
-        f_name = request.form['f_name']
-        l_name = request.form['l_name']
-        genre = request.form['genre']
+        company_name = request.form['f_name']
+        job_url = request.form['l_name']
+        applied_date = request.form['applied_date']
+        source = request.form['source']
+        notes = request.form['notes']
         
         # Process the data (e.g., add it to a database)
-        # For now, let's just print it to the console
-        print("Name:", f_name + " "+ l_name, ":", "Favorite Genre:", genre)
         
-        flash('User added successfully! Huzzah!', 'success')  # 'success' is a category; makes a green banner at the top
+        
+        flash('Application added successfully!', 'success')  # 'success' is a category; makes a green banner at the top
         # Redirect to home page or another page upon successful submission
         return redirect(url_for('home'))
     else:
         # Render the form page if the request method is GET
-        return render_template('add_user.html')
+        return render_template('add_application.html')
 
 @app.route('/delete-user',methods=['GET', 'POST'])
 def delete_user():

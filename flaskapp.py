@@ -62,21 +62,26 @@ def add_application():
         
         # Process the data (e.g., add it to a database)
         
-        execute_write( 
-            "INSERT IGNORE INTO companies (name) VALUES (%s)", # ignore skips insert if duplicate exists
-            (company_name,)
-        )
-
         res = execute_query(
             "SELECT company_id FROM companies WHERE name = %s",
             (company_name,)
         )
 
+        if len(res) == 0:
+            execute_write(
+                "INSERT INTO companies (name) VALUES (%s)",
+                (company_name,)
+            )
+            res = execute_query(
+                "SELECT company_id FROM companies WHERE name = %s",
+                (company_name,)
+            )
+
         company_id = res[0]['company_id']
 
         execute_write(
-            "INSERT INTO applications (company_id, job_title, job_url, applied_date, source, notes) VALUES (%s, %s, %s, %s, %s, %s)",
-            (company_id, job_title, job_url, applied_date, source, notes)
+            "INSERT INTO applications (user_id, company_id, job_title, job_url, applied_date, source, notes) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            (1, company_id, job_title, job_url, applied_date, source, notes)
         )
 
         flash('Application added successfully!', 'success')  # 'success' is a category; makes a green banner at the top

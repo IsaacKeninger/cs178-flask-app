@@ -108,7 +108,7 @@ def update_application():
 def display_users():
     # hard code a value to the users_list;
     # note that this could have been a result from an SQL query :) 
-    applications_list = (('John','Doe','Comedy'),('Jane', 'Doe','Drama'))
+    applications_list = execute_query("""SELECT * FROM Applications;""")#     
     return render_template('display_applications.html', users = applications_list)
 
 

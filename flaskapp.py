@@ -23,18 +23,18 @@ from dbCode import *
 
 # CLAUDE
 # for dynamodb log
-dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
-event_table = dynamodb.table('event_log')
+# dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+# event_table = dynamodb.Table('event_log')
 
-#function for logging to the dynamodb table
-def log_event(app_id, event, old_val=None, new_val=None):
-    event_table.put_item(Item={
-        'application_id': str(app_id),
-        'timestamp': datetime.now(timezone.utc).isoformat(),
-        'event': event,
-        'old_val': old_val or '',
-        'new_val': new_val or ''
-    })
+# #function for logging to the dynamodb table
+# def log_event(app_id, event, old_val=None, new_val=None):
+#     event_table.put_item(Item={
+#         'application_id': str(app_id),
+#         'timestamp': datetime.now(timezone.utc).isoformat(),
+#         'event': event,
+#         'old_val': old_val or '',
+#         'new_val': new_val or ''
+#     })
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key' # this is an artifact for using flash displays; 
@@ -53,8 +53,8 @@ def display_companies():
 def add_application():
     if request.method == 'POST':
         # Extract form data
-        company_name = request.form['f_name']
-        job_url = request.form['l_name']
+        company_name = request.form['company_name']
+        job_url = request.form['job_url']
         applied_date = request.form['applied_date']
         source = request.form['source']
         notes = request.form['notes']

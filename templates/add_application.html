@@ -7,7 +7,7 @@
 
 <body>
   <h1>Add New Application</h1>
-  <form action="{{ url_for('add-application') }}" method="post">
+  <form action="{{ url_for('add_application') }}" method="post">
     <label for="company_name">Company Name</label><br />
     <input type="text" id="company_name" name="company_name" required /><br />
 
@@ -21,7 +21,7 @@
     <input type="text" id="source" name="source" required /><br />
 
     <label for="notes">Any notes?</label>
-    <input type="text" id="notes" name="source" required /><br />
+    <input type="text" id="notes" name="notes" required /><br />
 
     <input type="submit" value="Submit" />
   </form>

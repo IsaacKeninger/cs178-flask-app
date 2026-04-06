@@ -62,6 +62,18 @@ def add_application():
         
         # Process the data (e.g., add it to a database)
         
+        execute_write( 
+            "INSERT IGNORE INTO companies (company_name) VALUES (%s)", # ignore skips insert if duplicate exists
+            (company_name,)
+        )
+
+        res = execute_query(
+            "SELECT id FROM companies WHERE company_name = %s",
+            (company_name,)
+        )
+
+        company_id = res[0]['id']
+
         execute_write(
             "INSERT INTO applications (company_name, job_title, job_url, applied_date, source, notes) VALUES (%s, %s, %s, %s, %s, %s)",
             (company_name, job_title, job_url, applied_date, source, notes)

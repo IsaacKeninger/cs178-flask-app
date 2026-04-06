@@ -109,7 +109,7 @@ def display_users():
     # hard code a value to the users_list;
     # note that this could have been a result from an SQL query :) 
     applications_list = execute_query("""SELECT * FROM applications;""")#     
-    return render_template('display_applications.html', users = applications_list)
+    return render_template('display_applications.html', applications=applications_list)
 
 
 # these two lines of code should always be the last in the file

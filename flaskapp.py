@@ -1,6 +1,16 @@
 # author: T. Urness and M. Moore
 # description: Flask example using redirect, url_for, and flash
 # credit: the template html files were constructed with the help of ChatGPT
+""" 
+uses flask: done
+rds correctly used: done
+dyamodb:wip
+crud: wip
+sql join: wip
+rds in vpc: wip
+creds not stored in repo: done
+readme: wip
+"""
 
 from flask import Flask
 from flask import render_template
@@ -21,8 +31,6 @@ def display_companies():
     rows = execute_query("""SELECT * FROM companies;""")
     return render_template('display_companies.html', companies=rows)
     
-                
-
 @app.route('/add-user', methods=['GET', 'POST'])
 def add_user():
     if request.method == 'POST':

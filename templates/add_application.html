@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>Add New Application</title>
+</head>
+
+<body>
+  <h1>Add New Application</h1>
+  <form action="{{ url_for('add_application') }}" method="post">
+    <label for="company_name">Company Name</label><br />
+    <input type="text" id="company_name" name="company_name" required /><br />
+
+    <label for="job_url">Job Url</label><br />
+    <input type="text" id="job_url" name="job_url" required /><br />
+
+    <label for="applied_date">Date Applied</label><br />
+    <input type="date" id="applied_date" name="applied_date" required /><br />
+
+    <label for="source">Where did you find it?</label>
+    <input type="text" id="source" name="source" required /><br />
+
+    <label for="notes">Any notes?</label>
+    <input type="text" id="notes" name="source" required /><br />
+
+    <input type="submit" value="Submit" />
+  </form>
+</body>
+
+</html>

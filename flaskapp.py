@@ -79,13 +79,30 @@ def delete_application():
         
         # Process the data (e.g., add it to a database)
         
-        flash('User deleted successfully! Hoorah!', 'warning') 
+        flash('Application deleted successfully!', 'warning') 
         # Redirect to home page or another page upon successful submission
         return redirect(url_for('home'))
     else:
         # Render the form page if the request method is GET
         return render_template('delete_application.html')
 
+@app.route("/update-application",methods=['GET', 'POST'])
+def update_application():
+    if request.method == 'POST':
+        # extract form data
+        company_name = request.form['company_name']
+        job_title = request.form['job_title']
+        job_url = request.form['job_url']
+        applied_date = request.form['applied_date']
+        source = request.form['source']
+        notes = request.form['notes']
+        
+        flash('Application updated successfully!', 'success')  # 'success' is a category; makes a green banner at the top
+        # Redirect to home page or another page upon successful submission
+        return redirect(url_for('home'))
+    else:
+        # Render the form page if the request method is GET
+        return render_template('update_application.html')
 
 @app.route('/display-users')
 def display_users():

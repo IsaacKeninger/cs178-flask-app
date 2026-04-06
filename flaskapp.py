@@ -75,7 +75,7 @@ def add_application():
         company_id = res[0]['company_id']
 
         execute_write(
-            "INSERT INTO applications (company_name, job_title, job_url, applied_date, source, notes) VALUES (%s, %s, %s, %s, %s, %s)",
+            "INSERT INTO applications (company_id, job_title, job_url, applied_date, source, notes) VALUES (%s, %s, %s, %s, %s, %s)",
             (company_name, job_title, job_url, applied_date, source, notes)
         )
 

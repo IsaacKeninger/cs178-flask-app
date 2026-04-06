@@ -76,7 +76,7 @@ def add_application():
 
         execute_write(
             "INSERT INTO applications (company_id, job_title, job_url, applied_date, source, notes) VALUES (%s, %s, %s, %s, %s, %s)",
-            (company_name, job_title, job_url, applied_date, source, notes)
+            (company_id, job_title, job_url, applied_date, source, notes)
         )
 
         flash('Application added successfully!', 'success')  # 'success' is a category; makes a green banner at the top

@@ -1,5 +1,5 @@
 # dbCode.py
-# Author: Your Name
+# Author: Isaac Keninger
 # Helper functions for database connection and queries
 
 import pymysql
@@ -22,3 +22,11 @@ def execute_query(query, args=()):
     rows = cur.fetchall()
     cur.close()
     return rows
+
+def execute_write(query, args=()):
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(query,args)
+    conn.commit()
+    cur.close()
+

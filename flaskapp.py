@@ -44,16 +44,17 @@ app.secret_key = 'your_secret_key' # this is an artifact for using flash display
 def home():
     return render_template('home.html')
 
-@app.route('/display_companies')
-def display_companies():
-    rows = execute_query("""SELECT * FROM companies;""")
-    return render_template('display_companies.html', companies=rows)
+# @app.route('/display_companies')
+# def display_companies():
+#     rows = execute_query("""SELECT * FROM companies;""")
+#     return render_template('display_companies.html', companies=rows)
     
 @app.route('/add-application', methods=['GET', 'POST'])
 def add_application():
     if request.method == 'POST':
         # Extract form data
         company_name = request.form['company_name']
+        job_title = request.form['job_title']
         job_url = request.form['job_url']
         applied_date = request.form['applied_date']
         source = request.form['source']
@@ -69,22 +70,21 @@ def add_application():
         # Render the form page if the request method is GET
         return render_template('add_application.html')
 
-@app.route('/delete-user',methods=['GET', 'POST'])
-def delete_user():
+@app.route('/delete-application',methods=['GET', 'POST'])
+def delete_application():
     if request.method == 'POST':
         # Extract form data
-        name = request.form['name']
+        company_name = request.form['company_name']
+        job_title = request.form['job_title']
         
         # Process the data (e.g., add it to a database)
-        # For now, let's just print it to the console
-        print("Name to delete:", name)
         
         flash('User deleted successfully! Hoorah!', 'warning') 
         # Redirect to home page or another page upon successful submission
         return redirect(url_for('home'))
     else:
         # Render the form page if the request method is GET
-        return render_template('delete_user.html')
+        return render_template('delete_application.html')
 
 
 @app.route('/display-users')

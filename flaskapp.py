@@ -63,7 +63,7 @@ def add_application():
         # Process the data (e.g., add it to a database)
         
         execute_write(
-            "INSERT INTO applications (company_name, job_title, job_url, applied_date, source, notes VALUES (%s, %s, %s, %s, %s, %s)",
+            "INSERT INTO applications (company_name, job_title, job_url, applied_date, source, notes) VALUES (%s, %s, %s, %s, %s, %s)",
             (company_name, job_title, job_url, applied_date, source, notes)
         )
 

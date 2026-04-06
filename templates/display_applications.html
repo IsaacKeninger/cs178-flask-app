@@ -11,6 +11,7 @@
         <table class="table table-bordered table-striped mt-3">
             <thead class="thead-dark"> <!-- creates a dark background for the table header -->
                 <tr>
+                    <th>Company</th>
                     <th>Job Title </th>
                     <th>Status</th>
                     <th>Applied Date</th>
@@ -21,6 +22,7 @@
             <tbody> <!-- table body -- loop through all of the Apps -->
                 {% for application in applications %}
                 <tr>
+                    <td>{{ applications['name'] }}</td>
                     <td>{{ application['job_title'] }}</td>
                     <td>{{ application['status'] }}</td>
                     <td>{{ application['applied_date'] }}</td>

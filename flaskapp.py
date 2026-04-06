@@ -129,7 +129,10 @@ def update_application():
 def display_users():
     # hard code a value to the users_list;
     # note that this could have been a result from an SQL query :) 
-    applications_list = execute_query("""SELECT applications.*, companies.name FROM applications JOIN companies WHERE applications.company_id = companies.company_id;""")#     
+    applications_list = execute_query("""SELECT applications.*, 
+                                      companies.name FROM applications J
+                                      OIN companies 
+                                      WHERE applications.company_id = companies.company_id;""")#     
     return render_template('display_applications.html', applications=applications_list)
 
 

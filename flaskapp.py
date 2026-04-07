@@ -61,12 +61,11 @@ def add_application():
         notes = request.form['notes']
         
         # Process the data (e.g., add it to a database)
-        
+        # THIS DATABASE LOGIC ADDITION WAS PARTIALLY GENERATED WITH THE HELP OF CLAUDE AI
         res = execute_query(
             "SELECT company_id FROM companies WHERE name = %s",
             (company_name,)
         )
-
         if len(res) == 0: # If the result of the query is nothing, company isnt present
             # add comapny to companies table
             execute_write(
@@ -128,6 +127,20 @@ def update_application():
         applied_date = request.form['applied_date']
         source = request.form['source']
         notes = request.form['notes']
+
+        # Look up company_id from company name
+        res = execute_query(
+            "SELECT company_id FROM companies WHERE name = %s",
+            (company_name,)
+        )
+        if res:
+            company_id = res[0]['company_id']
+            execute_write(
+                """UPDATE applications
+                   SET job_url = %s, applied_date = %s, source = %s, notes = %s
+                   WHERE company_id = %s AND job_title = %s""",
+                (job_url, applied_date, source, notes, company_id, job_title)
+            )
         
         flash('Application updated successfully!', 'success')  # 'success' is a category; makes a green banner at the top
         # Redirect to home page or another page upon successful submission

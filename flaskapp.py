@@ -28,7 +28,7 @@ event_table = dynamodb.Table('event_log')
 #function for logging to the dynamodb table
 def log_event(app_id, event, old_val=None, new_val=None):
     event_table.put_item(Item={
-        'application_id': str(app_id),
+        'app_id': str(app_id),
         'timestamp': datetime.datetime.now(timezone.utc).isoformat(),
         'event': event,
         'old_val': old_val or '',

@@ -21,20 +21,19 @@ from datetime import timezone
 import boto3 # for dynamodb
 from dbCode import *
 
-# CLAUDE
-# for dynamodb log
-# dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
-# event_table = dynamodb.Table('event_log')
+# CLAUDE for initializing dynamo db and event table
+dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+event_table = dynamodb.Table('event_log')
 
-# #function for logging to the dynamodb table
-# def log_event(app_id, event, old_val=None, new_val=None):
-#     event_table.put_item(Item={
-#         'application_id': str(app_id),
-#         'timestamp': datetime.now(timezone.utc).isoformat(),
-#         'event': event,
-#         'old_val': old_val or '',
-#         'new_val': new_val or ''
-#     })
+#function for logging to the dynamodb table
+def log_event(app_id, event, old_val=None, new_val=None):
+    event_table.put_item(Item={
+        'application_id': str(app_id),
+        'timestamp': datetime.datetime.now(timezone.utc).isoformat(),
+        'event': event,
+        'old_val': old_val or '',
+        'new_val': new_val or ''
+    })
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key' # this is an artifact for using flash displays; 
@@ -85,6 +84,14 @@ def add_application():
             (1, company_id, job_title, job_url, applied_date, source, notes)
         )
 
+        new_application = execute_query(
+            "SELECT application_id FROM applications WHERE company_id = %s AND job_title = %s",
+            (company_id, job_title)
+        )
+        new_id = new_application[0]['application_id']
+        log_event(new_id, 'INSERT')
+
+
         flash('Application added successfully!', 'success')  # 'success' is a category; makes a green banner at the top
         # Redirect to home page or another page upon successful submission
         return redirect(url_for('home'))
@@ -109,7 +116,17 @@ def delete_application():
                 "DELETE FROM applications WHERE company_id = %s AND job_title = %s",
                 (company_id, job_title)
             )
-        
+
+        # add to dynamo db
+        result = execute_query(
+            "SELECT application_id FROM applications WHERE company_id = %s AND job_title = %s",
+            (company_id, job_title)
+        )
+        if result:
+            app_id = result[0]['application_id']
+            log_event(app_id, 'DELETE')
+
+
         flash('Application deleted successfully!', 'warning') 
         # Redirect to home page or another page upon successful submission
         return redirect(url_for('home'))
@@ -142,6 +159,15 @@ def update_application():
                 (job_url, applied_date, source, notes, company_id, job_title)
             )
         
+        result = execute_query(
+            "SELECT application_id FROM applications WHERE company_id = %s AND job_title = %s",
+            (company_id, job_title)
+        )
+        if result == True:
+            app_id = result[0]['application_id']
+            log_event(app_id, 'UPDATE', old_val=job_title, new_val=f"{job_url}, {source}, {notes}")
+
+
         flash('Application updated successfully!', 'success')  # 'success' is a category; makes a green banner at the top
         # Redirect to home page or another page upon successful submission
         return redirect(url_for('home'))
@@ -156,6 +182,13 @@ def display_users():
     applications_list = execute_query("""SELECT applications.*, companies.name AS company_name FROM applications JOIN companies WHERE applications.company_id = companies.company_id;""")#     
     return render_template('display_applications.html', applications=applications_list)
 
+@app.route('/display-event-log')
+def display_event_log():
+    # dispalys the dynamo db table
+    response = event_table.scan()
+    events = response['items']
+    events.sort(key=lambda x: x['timestamp'], reverse=True) # this was made by claude, was tricky to find way to sort them by time
+    return render_template('event_log.html', events=events)
 
 # these two lines of code should always be the last in the file
 if __name__ == '__main__':

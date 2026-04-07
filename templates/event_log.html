@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head><title>Event Log</title></head>
+<body>
+  <h1>Event Log</h1>
+  <table border="1">
+    <tr>
+      <th>Application ID</th>
+      <th>Timestamp</th>
+      <th>Event</th>
+      <th>Old Value</th>
+      <th>New Value</th>
+    </tr>
+    {% for event in events %}
+    <tr>
+      <td>{{ event.application_id }}</td>
+      <td>{{ event.timestamp }}</td>
+      <td>{{ event.event }}</td>
+      <td>{{ event.old_val }}</td>
+      <td>{{ event.new_val }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <a href="/">Back to Home</a>
+</body>
+</html>

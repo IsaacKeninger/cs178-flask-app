@@ -186,7 +186,7 @@ def display_users():
 def display_event_log():
     # dispalys the dynamo db table
     response = event_table.scan()
-    events = response['items']
+    events = response['Items']
     events.sort(key=lambda x: x['timestamp'], reverse=True) # this was made by claude, was tricky to find way to sort them by time
     return render_template('event_log.html', events=events)
 

@@ -29,4 +29,3 @@ def execute_write(query, args=()):
     cur.execute(query,args)
     conn.commit()
     cur.close()
-

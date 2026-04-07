@@ -6,8 +6,8 @@ uses flask: done
 rds correctly used: done
 dyamodb:wip
 crud: wip
-sql join: wip
-rds in vpc: wip
+sql join: Done
+rds in vpc: Done
 creds not stored in repo: done
 readme: wip
 """
@@ -67,16 +67,18 @@ def add_application():
             (company_name,)
         )
 
-        if len(res) == 0:
+        if len(res) == 0: # If the result of the query is nothing, company isnt present
+            # add comapny to companies table
             execute_write(
                 "INSERT INTO companies (name) VALUES (%s)",
                 (company_name,)
             )
+            # get id of company in table of name im looking for
             res = execute_query(
                 "SELECT company_id FROM companies WHERE name = %s",
                 (company_name,)
             )
-
+        # company_id key
         company_id = res[0]['company_id']
 
         execute_write(
@@ -98,7 +100,10 @@ def delete_application():
         company_name = request.form['company_name']
         job_title = request.form['job_title']
         
-        # Process the data (e.g., add it to a database)
+        execute_write(
+            "DELETE FROM applications WHERE company_name = %s AND job_title =  %s",
+            (company_name, job_title)
+        )
         
         flash('Application deleted successfully!', 'warning') 
         # Redirect to home page or another page upon successful submission

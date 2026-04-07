@@ -101,7 +101,7 @@ def delete_application():
         job_title = request.form['job_title']
         
         execute_write(
-            "DELETE FROM applications WHERE company_name = %s AND job_title =  %s",
+            "DELETE FROM applications WHERE company_id = (SELECT company_id FROM companies WHERE name = %s) AND job_title = %s",
             (company_name, job_title)
         )
         

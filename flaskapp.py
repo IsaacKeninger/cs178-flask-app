@@ -100,10 +100,16 @@ def delete_application():
         company_name = request.form['company_name']
         job_title = request.form['job_title']
         
-        execute_write(
-            "DELETE FROM applications WHERE company_id = (SELECT company_id FROM companies WHERE name = %s) AND job_title = %s",
-            (company_name, job_title)
+        res = execute_query(
+            "SELECT company_id FROM companies WHERE name = %s",
+            (company_name,)
         )
+        if res:
+            company_id = res[0]['company_id']
+            execute_write(
+                "DELETE FROM applications WHERE company_id = %s AND job_title = %s",
+                (company_id, job_title)
+            )
         
         flash('Application deleted successfully!', 'warning') 
         # Redirect to home page or another page upon successful submission

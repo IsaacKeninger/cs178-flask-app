@@ -1,14 +1,14 @@
-# [Your Project Name Here]
+# Job Application Tracker
 
 **CS178: Cloud and Database Systems — Project #1**
-**Author:** [Your Name]
-**GitHub:** [your-username]
+**Author:** Isaac Keninger
+**GitHub:** IsaacKeninger
 
 ---
 
 ## Overview
 
-<!-- Describe your project in 2-4 sentences. What does it do? Who is it for? What problem does it solve? -->
+This project is a crud project for tracking job applications. Allowing for the recording of applications and full crud compatability, users can keep track of and compile their job applications into one website. 
 
 ---
 
@@ -16,8 +16,8 @@
 
 - **Flask** — Python web framework
 - **AWS EC2** — hosts the running Flask application
-- **AWS RDS (MySQL)** — relational database for [describe what you stored]
-- **AWS DynamoDB** — non-relational database for [describe what you stored]
+- **AWS RDS (MySQL)** — relational database for Application and company data realationships
+- **AWS DynamoDB** — non-relational database for event logging of crud operations
 - **GitHub Actions** — auto-deploys code from GitHub to EC2 on push
 
 ---
@@ -25,14 +25,23 @@
 ## Project Structure
 
 ```
-ProjectOne/
-├── flaskapp.py          # Main Flask application — routes and app logic
+CS178-FLASK-APP/
+├── .github
+   ├── deploy.yml
+├── templates
+   ├── add_application.html
+   ├── delete_applications.html
+   ├── display_applications.html
+   ├── display_users.html
+   ├── event_log.html
+   ├── home.html
+   ├── update_application.html
+├── .gitignore
 ├── dbCode.py            # Database helper functions (MySQL connection + queries)
+├── flaskapp.py          # Main Flask application — routes and app logic
 ├── creds_sample.py      # Sample credentials file (see Credential Setup below)
-├── templates/
-│   ├── home.html        # Landing page
-│   ├── [other].html     # Add descriptions for your other templates
-├── .gitignore           # Excludes creds.py and other sensitive files
+├── flaskapp.py          # Main Flask application — routes and app logic
+├── job_tracker_schema.sql # Job Application Tracker DB schema
 └── README.md
 ```
 
@@ -70,7 +79,7 @@ ProjectOne/
 The app is deployed on an AWS EC2 instance. To view the live version:
 
 ```
-http://[your-ec2-public-ip]:8080
+http://98.88.23.115/:8080
 ```
 
 _(Note: the EC2 instance may not be running after project submission.)_
@@ -97,22 +106,25 @@ db = "your-database-name"
 
 ### SQL (MySQL on RDS)
 
-<!-- Briefly describe your relational database schema. What tables do you have? What are the key relationships? -->
+This database schema for the job_tracker schema tracks data from user applications and companies. The primary realationship is between application and companies, where the companies applied to are related to each other directly. Otherwise, the database stores information about the applications themselves.
 
 **Example:**
 
-- `[TableName]` — stores [description]; primary key is `[key]`
-- `[TableName]` — stores [description]; foreign key links to `[other table]`
+- `applications` — stores user applications; primary key is `applications_id`
+- `companies` — stores company information; foreign key links to `applications table`
 
-The JOIN query used in this project: <!-- describe it in plain English -->
+The JOIN query used in this project: 
+SELECT applications.*, companies.name AS company_name FROM applications JOIN companies WHERE applications.company_id = companies.company_id;
+
+This Query selects all items from applications,and the company names from the companies table then joins applications and companies matching where the applicatino rows company_id is equal to the companies_id. This matches applications with companies in the db. 
 
 ### DynamoDB
 
-<!-- Describe your DynamoDB table. What is the partition key? What attributes does each item have? How does it connect to the rest of the app? -->
+This dynamo db table keeps track of crud operations that occur in the project. These attributes include ones such as which application was changed, the time it was, and the operations that occured. This connects as a way to quickly reference events that happen with the use of a nosql db. The partition key is app_id. 
 
-- **Table name:** `[your-table-name]`
-- **Partition key:** `[key-name]`
-- **Used for:** [description]
+- **Table name:** `event_log`
+- **Partition key:** `app_id`
+- **Used for:** Tracking when crud operations occur with time dates and other information. 
 
 ---
 
@@ -120,19 +132,19 @@ The JOIN query used in this project: <!-- describe it in plain English -->
 
 | Operation | Route      | Description    |
 | --------- | ---------- | -------------- |
-| Create    | `/[route]` | [what it does] |
-| Read      | `/[route]` | [what it does] |
-| Update    | `/[route]` | [what it does] |
-| Delete    | `/[route]` | [what it does] |
+| Create    | `/add-application` | Adds a job application to the tracker |
+| Read      | `/delete-application` | Deletes a job application from the tracker |
+| Update    | `/update-application` | Updates fields of an application |
+| Delete    | `/display-applications` | Displays all applications |
 
 ---
 
 ## Challenges and Insights
 
-<!-- What was the hardest part? What did you learn? Any interesting design decisions? -->
+The hardest part of creating this application was implementing the logic for each of the crud operations. This includes making the queries as well as storing and validing the output of those queries. I learned a lot about making the queries themselves and how to handle the data after recording the output. 
 
 ---
 
 ## AI Assistance
 
-<!-- List any AI tools you used (e.g., ChatGPT) and briefly describe what you used them for. Per course policy, AI use is allowed but must be cited in code comments and noted here. -->
+Claude AI was used for code generation of parts of the project. In particular, Claude AI was used for support in creating and initializing the dynamo db table as an event table, the database logic for the add_application endpoint, and for the events.sort() on line 233 to help me sort event logger events by timestamp. By so using claude for these sections, I was able to learn how to sort events with lambda functions, understand and conceputalize the logic for the backend endpoints, and streamline initalizing the boilerplate dynamo db code. Claude generated the sql schema as well.

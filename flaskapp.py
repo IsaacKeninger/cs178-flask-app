@@ -162,12 +162,12 @@ def update_application():
     """
     if request.method == 'POST':
         # extract form data
-        company_name = request.form['company_name']
+        company_name = request.form.get['company_name']
         job_title = request.form['job_title']
-        job_url = request.form['job_url']
-        applied_date = request.form['applied_date']
-        source = request.form['source']
-        notes = request.form['notes']
+        job_url = request.form.get('job_url','')
+        applied_date = request.form('applied_date', '')
+        source = request.form.get('source', '')
+        notes = request.form.get('notes', '')
 
         try:
             # Look up company_id from company name

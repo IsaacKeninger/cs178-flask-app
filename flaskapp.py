@@ -19,6 +19,7 @@ import datetime
 from datetime import timezone
 import boto3 # for dynamodb
 from dbCode import *
+from flask import session
 
 # CLAUDE AI for initializing dynamo db with event log function.
 dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
@@ -38,7 +39,6 @@ def log_event(app_id, event, company, old_val=None, new_val=None):
 app = Flask(__name__)
 app.secret_key = 'your_secret_key' # this is an artifact for using flash displays; 
                                    # it is required, but you can leave this alone
-
 @app.route('/')
 def home():
     """
@@ -162,10 +162,10 @@ def update_application():
     """
     if request.method == 'POST':
         # extract form data
-        company_name = request.form.get['company_name']
+        company_name = request.form['company_name']
         job_title = request.form['job_title']
         job_url = request.form.get('job_url','')
-        applied_date = request.form('applied_date', '')
+        applied_date = request.form.get('applied_date', '')
         source = request.form.get('source', '')
         notes = request.form.get('notes', '')
 

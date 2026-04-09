@@ -4,7 +4,7 @@
 --          interview_rounds, compensation, deadlines
 -- ============================================================
 
--- THIS SCHEMA WAS GENERATED WITH THE HELP OF CLAUDE AI
+-- CLAUDE AI GENERATED THIS DATABASE SCHEMA
 CREATE DATABASE IF NOT EXISTS job_tracker;
 USE job_tracker;
 

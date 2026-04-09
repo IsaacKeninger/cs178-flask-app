@@ -15,20 +15,19 @@ readme: wip
 from flask import Flask
 from flask import render_template
 from flask import Flask, render_template, request, redirect, url_for, flash
-import pymysql
 import datetime
 from datetime import timezone
 import boto3 # for dynamodb
 from dbCode import *
 
-# CLAUDE for initializing dynamo db and event table
+# CLAUDE AI for initializing dynamo db with event log function.
 dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
 event_table = dynamodb.Table('event_log')
-
 # function for logging to the dynamodb table
-def log_event(app_id, event, old_val=None, new_val=None):
+def log_event(app_id, event, company, job_title, old_val=None, new_val=None):
     event_table.put_item(Item={
         'app_id': str(app_id),
+        'company': company,
         'timestamp': datetime.datetime.now(timezone.utc).isoformat(),
         'event': event,
         'old_val': old_val or '',
@@ -41,15 +40,21 @@ app.secret_key = 'your_secret_key' # this is an artifact for using flash display
 
 @app.route('/')
 def home():
+    """
+    Endpoint for rendering the home page of the tracker.
+    """
     return render_template('home.html')
 
-# @app.route('/display_companies')
-# def display_companies():
-#     rows = execute_query("""SELECT * FROM companies;""")
-#     return render_template('display_companies.html', companies=rows)
-    
 @app.route('/add-application', methods=['GET', 'POST'])
 def add_application():
+    """
+    End Point for /add-application. 
+    1. Accepts data from html forms, executes a query to database to get database name. 
+    2. If the company is already in companies table, else if the company is not already in comnpanies then add it 
+    3. Find the ID of the company im finding, then insert into applications information of the application
+    4. The event is then logged onto dynamo db event log
+    """
+
     if request.method == 'POST':
         # Extract form data
         company_name = request.form['company_name']
@@ -58,17 +63,13 @@ def add_application():
         applied_date = request.form['applied_date']
         source = request.form['source']
         notes = request.form['notes']
-        
-        # Process the data (e.g., add it to a database)
-        # THIS DATABASE LOGIC ADDITION WAS PARTIALLY GENERATED WITH THE HELP OF CLAUDE AI
 
-
+        # THIS DATABASE LOGIC ADDITION WAS PARTIALLY GENERATED WITH THE HELP OF CLAUDE AI, NON DYNAMO DB IMPLEMENTATION PART
         try:
-
             res = execute_query(
                 "SELECT company_id FROM companies WHERE name = %s",
                 (company_name,)
-        )
+                )
             if len(res) == 0: # If the result of the query is nothing, company isnt present
                 # add comapny to companies table
                 execute_write(
@@ -93,8 +94,7 @@ def add_application():
                 (company_id, job_title)
             )
             new_id = new_application[0]['application_id']
-            log_event(new_id, 'INSERT')
-
+            log_event(new_id, 'INSERT', company_name)
 
             flash('Application added successfully!', 'success')  # 'success' is a category; makes a green banner at the top
             # Redirect to home page or another page upon successful submission
@@ -109,13 +109,16 @@ def add_application():
 
 @app.route('/delete-application',methods=['GET', 'POST'])
 def delete_application():
+    """
+    1. recieves the company name and job title from user
+    2. extracts query to match company_id to jobtitle and removes company from applications. 
+    3. event is then logged.
+    """
     if request.method == 'POST':
         # Extract form data
         company_name = request.form['company_name']
         job_title = request.form['job_title']
-
         try:
-
             res = execute_query(
                 "SELECT company_id FROM companies WHERE name = %s",
                 (company_name,)
@@ -135,7 +138,7 @@ def delete_application():
 
             if result:
                 app_id = result[0]['application_id']
-                log_event(app_id, 'DELETE')
+                log_event(app_id, 'DELETE', company_name)
 
         except Exception as exception:
             flash('Application Deletion failed...', 'danger')
@@ -150,6 +153,12 @@ def delete_application():
 
 @app.route("/update-application",methods=['GET', 'POST'])
 def update_application():
+    """
+    1. select application to change
+    2. match company id to job title
+    3. update application in applications table
+    4. log event
+    """
     if request.method == 'POST':
         # extract form data
         company_name = request.form['company_name']
@@ -158,7 +167,6 @@ def update_application():
         applied_date = request.form['applied_date']
         source = request.form['source']
         notes = request.form['notes']
-
 
         try:
             # Look up company_id from company name
@@ -182,7 +190,7 @@ def update_application():
             )
             if result:
                 app_id = result[0]['application_id']
-                log_event(app_id, 'UPDATE', old_val=job_title, new_val=f"{job_url}, {source}, {notes}")
+                log_event(app_id, 'UPDATE', company_name old_val=job_title, new_val=f"{job_url}, {source}, {notes}")
 
 
             flash('Application updated successfully!', 'success')  # 'success' is a category; makes a green banner at the top
@@ -197,12 +205,14 @@ def update_application():
 
 @app.route('/display-applications')
 def display_applications():
-    # hard code a value to the users_list;
-    # note that this could have been a result from an SQL query :) 
-    # MY COMPLEXT SQL QUERY. IT selects all the items from applications, joins the companies with applications to find which applications relate to which company
+    """
+    1. Display applications in lsit format
+    """
+
+    # MY COMPLEX SQL QUERY. IT selects all the items from applications, joins the companies with applications to find which applications relate to which company
     try:
         applications_list = execute_query("""SELECT applications.*, companies.name AS company_name FROM applications JOIN companies WHERE applications.company_id = companies.company_id;""")
-        if applications_list:
+        if applications_list: # meaning there is a result
             return render_template('display_applications.html', applications=applications_list)
         else: # meaning there is nothing in list
             return redirect(url_for('home'))
@@ -210,9 +220,12 @@ def display_applications():
         flash('Failed to Display Applications: ', 'danger')
         return redirect(url_for('home'))
 
-
+# DYNAMO DB IMPLEMENTATION
 @app.route('/display-event-log')
 def display_event_log():
+    """
+    display event log from dynamo db
+    """
     try:
         # dispalys the dynamo db table
         response = event_table.scan()

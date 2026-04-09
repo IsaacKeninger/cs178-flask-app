@@ -24,6 +24,9 @@ def execute_query(query, args=()):
     return rows
 
 def execute_write(query, args=()):
+    """
+    Executes a write to a query without fetching the rows, more post. 
+    """
     conn = get_conn()
     cur = conn.cursor()
     cur.execute(query,args)

@@ -5,7 +5,7 @@
   <h1>Event Log</h1>
   <table border="1">
     <tr>
-      <th>Application ID</th>
+      <th>Company</th>      
       <th>Timestamp</th>
       <th>Event</th>
       <th>Old Value</th>
@@ -13,7 +13,7 @@
     </tr>
     {% for event in events %}
     <tr>
-      <td>{{ event.app_id }}</td>
+      <td>{{ event.company }}</td>
       <td>{{ event.timestamp }}</td>
       <td>{{ event.event }}</td>
       <td>{{ event.old_val }}</td>

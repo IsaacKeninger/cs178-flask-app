@@ -102,7 +102,7 @@ def add_application():
             return redirect(url_for('home'))
         
         except Exception as exception:
-            flash('Application addition failed...', 'danger')
+            flash(f'Application addition failed... ({exception})', 'danger')
             return redirect(url_for('home'))
     else:
         # Render the form page if the request method is GET
@@ -142,7 +142,7 @@ def delete_application():
                 log_event(app_id, 'DELETE', company_name)
 
         except Exception as exception:
-            flash('Application Deletion failed...', 'danger')
+            flash(f'Application Deletion failed... ({exception})', 'danger')
             return redirect(url_for('home'))
 
         flash('Application deleted successfully!', 'warning') 
@@ -198,7 +198,7 @@ def update_application():
             # Redirect to home page or another page upon successful submission
             return redirect(url_for('home'))
         except Exception as exception:
-            flash('Application updating failed...', 'danger')
+            flash(f'Application updating failed... ({exception})', 'danger')
             return redirect(url_for('home'))
     else:
         # Render the form page if the request method is GET
@@ -218,7 +218,7 @@ def display_applications():
         else: # meaning there is nothing in list
             return redirect(url_for('home'))
     except Exception as exception:
-        flash('Failed to Display Applications: ', 'danger')
+        flash(f'Failed to Display Applications... ({exception})', 'danger')
         return redirect(url_for('home'))
 
 # DYNAMO DB IMPLEMENTATION
@@ -234,7 +234,7 @@ def display_event_log():
         events.sort(key=lambda x: x['timestamp'], reverse=True) # this was made by claude, was tricky to find way to sort them by time
         return render_template('event_log.html', events=events)
     except Exception as exception:
-        flash('Failed to load event_log...')
+        flash(f'Failed to load event_log... ({exception})', 'danger')
         return redirect(url_for('home'))
 
 # these two lines of code should always be the last in the file

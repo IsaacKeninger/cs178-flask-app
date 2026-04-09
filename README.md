@@ -79,7 +79,7 @@ CS178-FLASK-APP/
 The app is deployed on an AWS EC2 instance. To view the live version:
 
 ```
-http://98.88.23.115/:8080
+http://98.88.23.115:8080
 ```
 
 _(Note: the EC2 instance may not be running after project submission.)_

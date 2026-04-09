@@ -190,7 +190,7 @@ def update_application():
             )
             if result:
                 app_id = result[0]['application_id']
-                log_event(app_id, 'UPDATE', company_name old_val=job_title, new_val=f"{job_url}, {source}, {notes}")
+                log_event(app_id, 'UPDATE', company_name, old_val=job_title, new_val=f"{job_url}, {source}, {notes}")
 
 
             flash('Application updated successfully!', 'success')  # 'success' is a category; makes a green banner at the top

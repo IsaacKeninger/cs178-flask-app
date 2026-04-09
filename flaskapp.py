@@ -24,7 +24,7 @@ from dbCode import *
 dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
 event_table = dynamodb.Table('event_log')
 # function for logging to the dynamodb table
-def log_event(app_id, event, company, job_title, old_val=None, new_val=None):
+def log_event(app_id, event, company, old_val=None, new_val=None):
     event_table.put_item(Item={
         'app_id': str(app_id),
         'company': company,

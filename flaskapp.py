@@ -4,8 +4,8 @@
 """ 
 uses flask: done
 rds correctly used: done
-dyamodb:wip
-crud: wip
+dyamodb:done
+crud: done
 sql join: Done
 rds in vpc: Done
 creds not stored in repo: done
@@ -25,7 +25,7 @@ from dbCode import *
 dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
 event_table = dynamodb.Table('event_log')
 
-#function for logging to the dynamodb table
+# function for logging to the dynamodb table
 def log_event(app_id, event, old_val=None, new_val=None):
     event_table.put_item(Item={
         'app_id': str(app_id),
@@ -61,40 +61,48 @@ def add_application():
         
         # Process the data (e.g., add it to a database)
         # THIS DATABASE LOGIC ADDITION WAS PARTIALLY GENERATED WITH THE HELP OF CLAUDE AI
-        res = execute_query(
-            "SELECT company_id FROM companies WHERE name = %s",
-            (company_name,)
-        )
-        if len(res) == 0: # If the result of the query is nothing, company isnt present
-            # add comapny to companies table
-            execute_write(
-                "INSERT INTO companies (name) VALUES (%s)",
-                (company_name,)
-            )
-            # get id of company in table of name im looking for
+
+
+        try:
+
             res = execute_query(
                 "SELECT company_id FROM companies WHERE name = %s",
                 (company_name,)
+        )
+            if len(res) == 0: # If the result of the query is nothing, company isnt present
+                # add comapny to companies table
+                execute_write(
+                    "INSERT INTO companies (name) VALUES (%s)",
+                    (company_name,)
+                )
+                # get id of company in table of name im looking for
+                res = execute_query(
+                    "SELECT company_id FROM companies WHERE name = %s",
+                    (company_name,)
+                )
+            # company_id key
+            company_id = res[0]['company_id']
+
+            execute_write(
+                "INSERT INTO applications (user_id, company_id, job_title, job_url, applied_date, source, notes) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                (1, company_id, job_title, job_url, applied_date, source, notes)
             )
-        # company_id key
-        company_id = res[0]['company_id']
 
-        execute_write(
-            "INSERT INTO applications (user_id, company_id, job_title, job_url, applied_date, source, notes) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-            (1, company_id, job_title, job_url, applied_date, source, notes)
-        )
-
-        new_application = execute_query(
-            "SELECT application_id FROM applications WHERE company_id = %s AND job_title = %s",
-            (company_id, job_title)
-        )
-        new_id = new_application[0]['application_id']
-        log_event(new_id, 'INSERT')
+            new_application = execute_query(
+                "SELECT application_id FROM applications WHERE company_id = %s AND job_title = %s",
+                (company_id, job_title)
+            )
+            new_id = new_application[0]['application_id']
+            log_event(new_id, 'INSERT')
 
 
-        flash('Application added successfully!', 'success')  # 'success' is a category; makes a green banner at the top
-        # Redirect to home page or another page upon successful submission
-        return redirect(url_for('home'))
+            flash('Application added successfully!', 'success')  # 'success' is a category; makes a green banner at the top
+            # Redirect to home page or another page upon successful submission
+            return redirect(url_for('home'))
+        
+        except Exception as exception:
+            flash('Application addition failed...', 'danger')
+            return redirect(url_for('home'))
     else:
         # Render the form page if the request method is GET
         return render_template('add_application.html')
@@ -105,27 +113,33 @@ def delete_application():
         # Extract form data
         company_name = request.form['company_name']
         job_title = request.form['job_title']
-        
-        res = execute_query(
-            "SELECT company_id FROM companies WHERE name = %s",
-            (company_name,)
-        )
-        if res:
-            company_id = res[0]['company_id']
+
+        try:
+
+            res = execute_query(
+                "SELECT company_id FROM companies WHERE name = %s",
+                (company_name,)
+                )
+            if res:
+                company_id = res[0]['company_id']
+                # get apps id prior deletion
+            result = execute_query(
+                "SELECT application_id FROM applications WHERE company_id = %s AND job_title = %s",
+                (company_id, job_title)
+            )
+
             execute_write(
                 "DELETE FROM applications WHERE company_id = %s AND job_title = %s",
                 (company_id, job_title)
             )
 
-        # add to dynamo db
-        result = execute_query(
-            "SELECT application_id FROM applications WHERE company_id = %s AND job_title = %s",
-            (company_id, job_title)
-        )
-        if result:
-            app_id = result[0]['application_id']
-            log_event(app_id, 'DELETE')
+            if result:
+                app_id = result[0]['application_id']
+                log_event(app_id, 'DELETE')
 
+        except Exception as exception:
+            flash('Application Deletion failed...', 'danger')
+            return redirect(url_for('home'))
 
         flash('Application deleted successfully!', 'warning') 
         # Redirect to home page or another page upon successful submission
@@ -145,50 +159,69 @@ def update_application():
         source = request.form['source']
         notes = request.form['notes']
 
-        # Look up company_id from company name
-        res = execute_query(
-            "SELECT company_id FROM companies WHERE name = %s",
-            (company_name,)
-        )
-        if res:
-            company_id = res[0]['company_id']
-            execute_write(
-                """UPDATE applications
-                   SET job_url = %s, applied_date = %s, source = %s, notes = %s
-                   WHERE company_id = %s AND job_title = %s""",
-                (job_url, applied_date, source, notes, company_id, job_title)
+
+        try:
+            # Look up company_id from company name
+            res = execute_query(
+                "SELECT company_id FROM companies WHERE name = %s",
+                (company_name,)
             )
-        
-        result = execute_query(
-            "SELECT application_id FROM applications WHERE company_id = %s AND job_title = %s",
-            (company_id, job_title)
-        )
-        if result == True:
-            app_id = result[0]['application_id']
-            log_event(app_id, 'UPDATE', old_val=job_title, new_val=f"{job_url}, {source}, {notes}")
+
+            if res:
+                company_id = res[0]['company_id']
+                execute_write(
+                    """UPDATE applications
+                    SET job_url = %s, applied_date = %s, source = %s, notes = %s
+                    WHERE company_id = %s AND job_title = %s""",
+                    (job_url, applied_date, source, notes, company_id, job_title)
+                )
+            
+            result = execute_query(
+                "SELECT application_id FROM applications WHERE company_id = %s AND job_title = %s",
+                (company_id, job_title)
+            )
+            if result:
+                app_id = result[0]['application_id']
+                log_event(app_id, 'UPDATE', old_val=job_title, new_val=f"{job_url}, {source}, {notes}")
 
 
-        flash('Application updated successfully!', 'success')  # 'success' is a category; makes a green banner at the top
-        # Redirect to home page or another page upon successful submission
-        return redirect(url_for('home'))
+            flash('Application updated successfully!', 'success')  # 'success' is a category; makes a green banner at the top
+            # Redirect to home page or another page upon successful submission
+            return redirect(url_for('home'))
+        except Exception as exception:
+            flash('Application updating failed...', 'danger')
+            return redirect(url_for('home'))
     else:
         # Render the form page if the request method is GET
         return render_template('update_application.html')
 
 @app.route('/display-applications')
-def display_users():
+def display_applications():
     # hard code a value to the users_list;
     # note that this could have been a result from an SQL query :) 
-    applications_list = execute_query("""SELECT applications.*, companies.name AS company_name FROM applications JOIN companies WHERE applications.company_id = companies.company_id;""")#     
-    return render_template('display_applications.html', applications=applications_list)
+    # MY COMPLEXT SQL QUERY. IT selects all the items from applications, joins the companies with applications to find which applications relate to which company
+    try:
+        applications_list = execute_query("""SELECT applications.*, companies.name AS company_name FROM applications JOIN companies WHERE applications.company_id = companies.company_id;""")
+        if applications_list:
+            return render_template('display_applications.html', applications=applications_list)
+        else: # meaning there is nothing in list
+            return redirect(url_for('home'))
+    except Exception as exception:
+        flash('Failed to Display Applications: ', 'danger')
+        return redirect(url_for('home'))
+
 
 @app.route('/display-event-log')
 def display_event_log():
-    # dispalys the dynamo db table
-    response = event_table.scan()
-    events = response['Items']
-    events.sort(key=lambda x: x['timestamp'], reverse=True) # this was made by claude, was tricky to find way to sort them by time
-    return render_template('event_log.html', events=events)
+    try:
+        # dispalys the dynamo db table
+        response = event_table.scan()
+        events = response['Items']
+        events.sort(key=lambda x: x['timestamp'], reverse=True) # this was made by claude, was tricky to find way to sort them by time
+        return render_template('event_log.html', events=events)
+    except Exception as exception:
+        flash('Failed to load event_log...')
+        return redirect(url_for('home'))
 
 # these two lines of code should always be the last in the file
 if __name__ == '__main__':
